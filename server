@@ -1,0 +1,52 @@
+//TCP server
+//winsock libraries
+#include <WinSock2.h>
+#include <Windows.h>
+#include <cstdio>
+
+int main()
+{
+    WSAData winSockData;
+    
+    //Start Winsock API
+    if(WSAStartup(MAKEWORD(2, 1), &winSockData)!=0)
+       printf("WinSocketAPI Startup failed. \n");
+
+    //Adress will hold the adress info. Data type: SOCKADDR_IN structure.
+    SOCKADDR_IN adress;
+    int adressSize = sizeof(adress);
+
+    //Set the IP, port and version of the adress (family).
+    adress.sin_addr.s_addr = inet_addr("127.0.0.1");
+    adress.sin_family = AF_INET;
+    adress.sin_port = htons(8080);
+
+    //Declaring 2 needed sockets.
+    SOCKET sock_Listen, sock_Connect;
+
+    //Setting the sock_Listen socket to an IPV4 type socket.
+    sock_Listen = socket(AF_INET, SOCK_STREAM, 0);
+
+    //Binding the adress to sock_Listen.
+    bind(sock_Listen, (SOCKADDR*)&adress, sizeof(adress));
+    //Setting the sock_Listen socket to listen for a connetion for the maximum number of tries (SOMAXCONN)
+    listen(sock_Listen, SOMAXCONN);
+
+    //Setting the sock_Connect socket to an IPV4 type socket.
+    sock_Connect = socket(AF_INET, SOCK_STREAM, 0);
+
+    while(true)
+    {
+        printf("\n\tServer is waiting for a connection...");
+        //The connection socket accepts a message from the client.
+        sock_Connect = accept(sock_Listen, (SOCKADDR*)&adress, &adressSize);
+        if(sock_Connect)
+        {
+            //If a connection is established, print it to the server and send a message to the client.
+            printf("Established connection with client. \n");
+            send(sock_Connect, "Successfully connected to server!", 46, 0);
+            break;
+        }
+    }
+    return 0;
+}
